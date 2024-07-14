@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-07-15T02:06:31+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Alc5’s Page</title><subtitle>文章置き場
+</subtitle><entry><title type="html">WSLのg++をアップデートする</title><link href="http://localhost:4000/cppupdate" rel="alternate" type="text/html" title="WSLのg++をアップデートする" /><published>2024-07-15T00:00:00+09:00</published><updated>2024-07-15T00:00:00+09:00</updated><id>http://localhost:4000/cppupdate</id><content type="html" xml:base="http://localhost:4000/cppupdate">&lt;p&gt;競技プログラミングをやっているときに&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;std::map::contains&lt;/code&gt;を使おうとしたらVScodeにそんなものはないと怒られた。&lt;br /&gt;
+そんな訳ないので調べてみると、まず&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;std::map::contains&lt;/code&gt;はC++20から追加された機能であり、あまりにも環境構築が適当すぎてローカルのC++の環境がC++17であることが判明。&lt;br /&gt;
+というわけで手元でもC++20を使えるようにしました。&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;やったこと&quot;&gt;やったこと&lt;/h2&gt;
+&lt;p&gt;環境:Ubuntu20.04.6(WSL)&lt;br /&gt;
+まず以下のコマンドを叩く。&lt;br /&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt update
+sudo apt install -y g++-13
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;この後&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;g++-13 --version
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;を叩いてバージョンが表示されたらインストールはOK。&lt;br /&gt;
+ただしこのままだと手元にg++13が入っただけでデフォルトで使われるg++が変わらない。&lt;br /&gt;
+そこでまず以下のコマンドをそれぞれ叩いてg++の場所を確認する。&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;which g++   
+which g++-13
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;そして&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo update-alternatives --install (g++の場所) g++ (g++-13の場所) 13
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;とするとデフォルトで使われるg++がG++-13になる。&lt;br /&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;g++ --version
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;を叩いて&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;g++ (Ubuntu 13.1.0-8ubuntu1~20.04.2) 13.1.0...&lt;/code&gt;とか出たらうまくいっている。&lt;br /&gt;
+さらにRemoteWSLでVScodeを起動して&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ctrl + Shift + P&lt;/code&gt;で「C/C++:構成の編集」を選択し、&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;compilerPath&lt;/code&gt;と&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cppStandard&lt;/code&gt;の項目を&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;compilerPath&quot;: (g++-13の場所),
+&quot;cppStandard&quot;: &quot;c++20&quot;,
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;と変更。&lt;br /&gt;
+これでC++20からの機能をVScode上で書いても警告が出なくなる。&lt;br /&gt;
+最後にg++でコンパイルするときにデフォルトでC++20が使われるようにする(いちいち&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;g++ -std=c++20 hoge.cpp&lt;/code&gt;と書くのは面倒くさい)。&lt;br /&gt;
+まずUbuntu上で&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nano ~/.bashrc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;などとして&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bashrc&lt;/code&gt;を編集する(viでも問題ない)。&lt;br /&gt;
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bashrc&lt;/code&gt;の末尾に&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;alias g++=&apos;g++ -std=c++20&apos;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;と追記して保存。&lt;br /&gt;
+コマンドライン上で&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;source ~/.bashrc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;を叩けばOK。&lt;br /&gt;
+これでg++でコンパイルするときにデフォルトでC++20でコンパイルされる。&lt;br /&gt;
+上手くいかない場合はいったんUbuntuを再起動すれば大丈夫なはず&lt;br /&gt;
+&lt;br /&gt;
+というわけで(今更過ぎるけど)無事にC++20が手元でも使えるようになりました。&lt;br /&gt;
+なんかヤバいバージョン運用をしている気がするんですがC++は現状競プロでしか使ってないしとりあえずこれでいいでしょう。&lt;br /&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">競技プログラミングをやっているときにstd::map::containsを使おうとしたらVScodeにそんなものはないと怒られた。 そんな訳ないので調べてみると、まずstd::map::containsはC++20から追加された機能であり、あまりにも環境構築が適当すぎてローカルのC++の環境がC++17であることが判明。 というわけで手元でもC++20を使えるようにしました。</summary></entry><entry><title type="html">Jekyllで作ったサイトをリニューアルした</title><link href="http://localhost:4000/test" rel="alternate" type="text/html" title="Jekyllで作ったサイトをリニューアルした" /><published>2024-06-25T00:00:00+09:00</published><updated>2024-06-25T00:00:00+09:00</updated><id>http://localhost:4000/test</id><content type="html" xml:base="http://localhost:4000/test">&lt;p&gt;2か月前にJekyll(Ruby製のmdとかからサイト綺麗に作ってくれるやつ)でサイトを作ってから完全に放置していたのでデザインを大幅に変えていい感じにした。&lt;br /&gt;
+&lt;br /&gt;
+とはいってもやることは簡単で、GitHub上で使いたいテーマのレポジトリをforkして、手元にcloneしてあとは自分好みに書き換えてpushして公開しただけ。&lt;br /&gt;
+今回使ったテーマは&lt;a href=&quot;https://github.com/abhinavs/moonwalk&quot;&gt;moonwalk&lt;/a&gt;というやつで、落ち着いた雰囲気だけどほしかった機能がだいたいデフォルトで入ってて良い感じ。&lt;br /&gt;
+&lt;br /&gt;
+ポートフォリオも生やせるので(今はコンフィグで殺してる 内容をTrue or Falseで簡単に切り替えられるのって楽ですよね)いずれこのサイトに作ったものを乗せたいですね、やるしかない！&lt;/p&gt;</content><author><name></name></author><summary type="html">2か月前にJekyll(Ruby製のmdとかからサイト綺麗に作ってくれるやつ)でサイトを作ってから完全に放置していたのでデザインを大幅に変えていい感じにした。 とはいってもやることは簡単で、GitHub上で使いたいテーマのレポジトリをforkして、手元にcloneしてあとは自分好みに書き換えてpushして公開しただけ。 今回使ったテーマはmoonwalkというやつで、落ち着いた雰囲気だけどほしかった機能がだいたいデフォルトで入ってて良い感じ。 ポートフォリオも生やせるので(今はコンフィグで殺してる 内容をTrue or Falseで簡単に切り替えられるのって楽ですよね)いずれこのサイトに作ったものを乗せたいですね、やるしかない！</summary></entry></feed>
